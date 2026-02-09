@@ -1,0 +1,71 @@
+// backend/utils/emailService.js
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+// 1. إعداد الناقل (Transporter) - هو المسؤول عن الاتصال بـ Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER, // الإيميل المرسل
+    pass: process.env.EMAIL_PASS, // كلمة مرور التطبيق
+  },
+});
+
+// 2. دالة إرسال إشعار طلب جديد
+const sendNewOrderEmail = async (order) => {
+  try {
+    // تجهيز محتوى الإيميل (HTML بسيط وجميل)
+    const mailOptions = {
+      from: `"DZ Shop Notifications" <${process.env.EMAIL_USER}>`, // اسم المرسل
+      to: process.env.ADMIN_EMAIL, // إيميل الأدمن (المستقبل)
+      subject: `🔔 طلب جديد: ${order.items[0].category} - ${order.totalAmount} د.ج`, // عنوان الرسالة
+      html: `
+        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #2563eb;">🎉 مبروك! وصلك طلب جديد</h2>
+          <p>تفاصيل الطلب أدناه:</p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>👤 الزبون:</strong></td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${order.customerName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>📞 الهاتف:</strong></td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${order.phone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>🏙️ المدينة:</strong></td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${order.city}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>💰 المبلغ الإجمالي:</strong></td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd; color: green; font-weight: bold;">${order.totalAmount} د.ج</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>📅 التاريخ:</strong></td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${new Date().toLocaleString('ar-DZ')}</td>
+            </tr>
+          </table>
+
+          <h3>📦 المنتجات المطلوبة:</h3>
+          <ul>
+            ${order.items.map(item => `<li>${item.name} (العدد: ${item.quantity}) - <small>${item.category}</small></li>`).join('')}
+          </ul>
+
+          <p style="margin-top: 20px; color: #777;">يرجى الدخول للوحة التحكم لمراجعة التفاصيل كاملة.</p>
+        </div>
+      `,
+    };
+
+    // إرسال الرسالة فعلياً
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully to Admin');
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+    // لن نوقف العملية إذا فشل الإيميل، فقط نسجل الخطأ
+  }
+};
+
+module.exports = { sendNewOrderEmail };
