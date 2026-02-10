@@ -4,10 +4,9 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// إعداد الناقل ليعمل مع Brevo أو أي خدمة SMTP
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp-relay.brevo.com', // نستخدم سيرفر Brevo
-  port: 587, // المنفذ القياسي لـ Brevo
+  host: 'smtp-relay.brevo.com', // نستخدم رابط Brevo مباشرة
+  port: 2525, // 👈 هذا هو الحل: منفذ بديل لا تحظره الاستضافات
   secure: false, 
   auth: {
     user: process.env.EMAIL_USER, 
@@ -15,15 +14,15 @@ const transporter = nodemailer.createTransport({
   },
   tls: {
     rejectUnauthorized: false
-  }
+  },
+  family: 4 // إجبار استخدام IPv4 لضمان الاستقرار
 });
 
 const sendNewOrderEmail = async (order) => {
   try {
-    console.log("🚀 Sending email via Brevo SMTP..."); 
+    console.log("🚀 Sending email via Brevo (Port 2525)..."); 
     
-    // تحديد المرسل والمستقبل
-    const sender = process.env.EMAIL_USER; // يجب أن يكون الإيميل المسجل في Brevo
+    const sender = process.env.EMAIL_USER; 
     const recipient = process.env.ADMIN_EMAIL || sender;
 
     const mailOptions = {
