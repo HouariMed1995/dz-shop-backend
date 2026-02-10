@@ -6,23 +6,23 @@ dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,            // استخدام منفذ SSL المباشر
-  secure: true,         // يجب أن تكون true مع المنفذ 465
+  port: 465,            // 1. استخدام المنفذ الآمن
+  secure: true,         // ضروري مع 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  // 2. إجبار النظام على استخدام IPv4 فقط (الحل لمشكلة ENETUNREACH)
+  family: 4, 
   tls: {
-    // هذا السطر يساعد في تجاوز بعض مشاكل التحقق من الشهادات
     rejectUnauthorized: false
   }
 });
 
 const sendNewOrderEmail = async (order) => {
   try {
-    console.log("🚀 Attempting to send email via Port 465..."); 
+    console.log("🚀 Attempting to send email via Port 465 (IPv4)..."); 
     
-    // لضمان وجود إيميل المستقبل
     const recipient = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
 
     const mailOptions = {
