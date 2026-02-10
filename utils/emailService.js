@@ -4,13 +4,18 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// 1. إعداد الناقل (Transporter) - هو المسؤول عن الاتصال بـ Gmail
+// 1. إعداد الناقل (Transporter) - تم التعديل لحل مشكلة Timeout
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com', // تحديد سيرفر جوجل يدوياً
+  port: 587,              // استخدام المنفذ 587 (الأكثر استقراراً مع Render)
+  secure: false,          // يجب أن يكون false مع المنفذ 587
   auth: {
-    user: process.env.EMAIL_USER, // الإيميل المرسل
-    pass: process.env.EMAIL_PASS, // كلمة مرور التطبيق
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // يمنع مشاكل الشهادات الأمنية التي قد توقف الإرسال
+  }
 });
 
 // 2. دالة إرسال إشعار طلب جديد
@@ -18,9 +23,11 @@ const sendNewOrderEmail = async (order) => {
   try {
     // تجهيز محتوى الإيميل (HTML بسيط وجميل)
     const mailOptions = {
-      from: `"DZ Shop Notifications" <${process.env.EMAIL_USER}>`, // اسم المرسل
+      from: `"DZ Shop Notifications" <${process.env.EMAIL_USER}>`, 
       to: process.env.ADMIN_EMAIL, // إيميل الأدمن (المستقبل)
-      subject: `🔔 طلب جديد: ${order.items[0].category} - ${order.totalAmount} د.ج`, // عنوان الرسالة
+      // تأكدنا من وجود متغير ADMIN_EMAIL في Render، وإذا لم يوجد سيرسل لنفس الإيميل المرسل
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER, 
+      subject: `🔔 طلب جديد: ${order.items[0].category} - ${order.totalAmount} د.ج`,
       html: `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
           <h2 style="color: #2563eb;">🎉 مبروك! وصلك طلب جديد</h2>
