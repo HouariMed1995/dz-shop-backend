@@ -5,23 +5,26 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,            // 1. استخدام المنفذ الآمن
-  secure: true,         // ضروري مع 465
+  // 👇 الحيلة هنا: استخدام النطاق القديم لجوجل لتجاوز الحظر المحتمل
+  host: 'smtp.googlemail.com', 
+  port: 587,            
+  secure: false,        // يجب أن تكون false مع 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  // 2. إجبار النظام على استخدام IPv4 فقط (الحل لمشكلة ENETUNREACH)
-  family: 4, 
+  family: 4, // الإبقاء على IPv4 ضروري جداً
   tls: {
     rejectUnauthorized: false
-  }
+  },
+  // إضافة وقت انتظار أقصر حتى لا ننتظر دقيقتين لنعرف النتيجة
+  connectionTimeout: 10000, // 10 ثواني
+  greetingTimeout: 10000    // 10 ثواني
 });
 
 const sendNewOrderEmail = async (order) => {
   try {
-    console.log("🚀 Attempting to send email via Port 465 (IPv4)..."); 
+    console.log("🚀 Attempting to send email via googlemail.com (Port 587)..."); 
     
     const recipient = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
 
