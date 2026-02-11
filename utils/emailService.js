@@ -24,7 +24,7 @@ const sendNewOrderEmail = async (order) => {
     console.log("🚀 Sending email via Brevo (Port 2525)..."); 
     
     // 👇 ضع إيميلك الحقيقي هنا (وليس المعرف a1fc...)
-    const senderEmail = "medjadelhouari.mh@gmail.com"; 
+    const senderEmail = "getznergone@gmail.com"; 
 
     // المستقبل هو نفس الإيميل
     const recipient = senderEmail;
