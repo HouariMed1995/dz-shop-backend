@@ -5,28 +5,34 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com', // نستخدم رابط Brevo مباشرة
-  port: 2525, // 👈 هذا هو الحل: منفذ بديل لا تحظره الاستضافات
+  host: 'smtp-relay.brevo.com', 
+  port: 587, // نعود للمنفذ 587 بما أن المصادقة نجحت (أو اتركها 2525 كلاهما يعمل)
   secure: false, 
   auth: {
+    // 👇 هنا نستخدم المعرف الغريب للدخول (هذا صحيح لا تلمسه)
     user: process.env.EMAIL_USER, 
     pass: process.env.EMAIL_PASS, 
   },
   tls: {
     rejectUnauthorized: false
   },
-  family: 4 // إجبار استخدام IPv4 لضمان الاستقرار
+  family: 4 
 });
 
 const sendNewOrderEmail = async (order) => {
   try {
-    console.log("🚀 Sending email via Brevo (Port 2525)..."); 
+    console.log("🚀 Sending email via Brevo..."); 
     
-    const sender = process.env.EMAIL_USER; 
-    const recipient = process.env.ADMIN_EMAIL || sender;
+    // 👇👇 التغيير المهم جداً هنا 👇👇
+    // استبدل 'YOUR_REAL_GMAIL@gmail.com' بإيميلك الحقيقي الذي سجلت به في Brevo
+    // هذا الإيميل هو الذي سيظهر للناس، وهو الوحيد المسموح له بالإرسال
+    const senderEmail = "houarimedjadel@gmail.com"; // ⚠️ تأكد أن هذا هو إيميلك الصحيح
+
+    // المستقبل هو الأدمن (أو نفس إيميل المرسل للتجربة)
+    const recipient = process.env.ADMIN_EMAIL || senderEmail;
 
     const mailOptions = {
-      from: `"DZ Shop" <${sender}>`, 
+      from: `"DZ Shop" <${senderEmail}>`, // يجب أن يكون الإيميل الحقيقي هنا
       to: recipient, 
       subject: `🔔 طلب جديد: ${order.items[0].category} - ${order.totalAmount} د.ج`,
       html: `
