@@ -30,7 +30,7 @@ const sendNewOrderEmail = async (order) => {
     const recipient = senderEmail;
 
     const mailOptions = {
-      from: `"DZ Shop" <${senderEmail}>`, // الإيميل الحقيقي يظهر هنا
+      from: `"getzner" <${senderEmail}>`, // الإيميل الحقيقي يظهر هنا
       to: recipient, 
       subject: `🔔 طلب جديد: ${order.items[0].category} - ${order.totalAmount} د.ج`,
       html: `
